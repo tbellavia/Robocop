@@ -37,7 +37,17 @@ class Robocop(discord.Client):
             return True
         return False
 
+    def is_not_ressource_message(self, message):
+        extractor = URLExtract()
+        if len(extractor.find_urls(message)) == 0:
+            return True
+        return False
+
     async def on_message(self, message):
+        if message.channel.id in self.forbidden_channels:
+            if self.is_not_ressource_message(message.content):
+                pass                 
+
         if self.is_not_markdown(message.content):
             splitted_message = message.content.split()
             counter = sum([splitted_message.count(keyword) for keyword in self.reserved_keywords])
