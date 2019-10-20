@@ -3,6 +3,7 @@ import discord
 import re
 from dotenv import load_dotenv
 from robocop.err_messages import ErrorMessages
+from robocop.channels import Channels
 from urlextract import URLExtract
 
 
@@ -23,12 +24,6 @@ class Robocop(discord.Client):
             "break", "except", "in", "raise",
             "print", "len", "[", "]", "{", "}"
         ]
-        self.code_channels = [
-            633826042741653510
-        ]
-        self.forbidden_channels = [
-            635213581926924311
-        ]
         print(f"{client.user} has connected to Discord!")
 
     def is_not_markdown(self, message):
@@ -44,23 +39,26 @@ class Robocop(discord.Client):
         return False
 
     async def on_message(self, message):
-        if message.channel.id in self.forbidden_channels:
+        if message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
             if self.is_not_ressource_message(message.content):
-                pass                 
+                await message.author.send(
+                    ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention)
+                )
+                await message.delete()
 
         if self.is_not_markdown(message.content):
-            splitted_message = message.content.split()
+            splitted_message = message.content.split()  
             counter = sum([splitted_message.count(keyword) for keyword in self.reserved_keywords])
             counter += sum([1 for keyword in self.reserved_keywords if keyword in splitted_message])
 
             if counter >= 5:
-                if message.channel.id in self.code_channels:
+                if message.channel.id in Channels.CODE_CHANNELS.value:
                     await message.channel.send(
-                        f"{ErrorMessages.MARKDOWN_FAIL.value.replace('<PLACEHOLDER>', message.author.mention)}"
+                        ErrorMessages.MARKDOWN_FAIL.value.replace('<PLACEHOLDER>', message.author.mention)
                     )
                 else:
                     await message.channel.send(
-                        f"{ErrorMessages.INAPPROPRIATE_CHANNEL_CODE.value.replace('<PLACEHOLDER>', message.author.mention)}"
+                        ErrorMessages.INAPPROPRIATE_CHANNEL_CODE.value.replace('<PLACEHOLDER>', message.author.mention)
                     )
 
 client = Robocop()
