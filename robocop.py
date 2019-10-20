@@ -12,6 +12,12 @@ token = os.getenv('DISCORD_TOKEN')
 
 client = discord.Client()
 
+
+# FIXME need to modify channel triggering : 
+# should not trigger two errors when forbidden channel error has been 
+# handled before
+
+
 class Robocop(discord.Client):
     async def on_ready(self):
         self.reserved_keywords = [
