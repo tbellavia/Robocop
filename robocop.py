@@ -48,7 +48,7 @@ class Robocop(discord.Client):
         if message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
             if self.is_not_ressource_message(message.content):
                 await message.author.send(
-                    ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention)
+                    "{}. Voici une copie de ton message, en cas de faux positif, n'hésites pas à prévenir un modérateur.\nMessage : {}".format(ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention), message.content)
                 )
                 await message.delete()
 
