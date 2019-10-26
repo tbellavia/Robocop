@@ -45,12 +45,14 @@ class Robocop(discord.Client):
         return False
 
     async def on_message(self, message):
+        # The return statment is here to avoid triggering other alerts.
         if message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
             if self.is_not_ressource_message(message.content):
                 await message.author.send(
                     "{}. Voici une copie de ton message, en cas de faux positif, n'hésites pas à prévenir un modérateur.\nMessage : {}".format(ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention), message.content)
                 )
                 await message.delete()
+                return
 
         if self.is_not_markdown(message.content):
             splitted_message = message.content.split()  
@@ -62,10 +64,12 @@ class Robocop(discord.Client):
                     await message.channel.send(
                         ErrorMessages.MARKDOWN_FAIL.value.replace('<PLACEHOLDER>', message.author.mention)
                     )
+                    return
                 else:
                     await message.channel.send(
                         ErrorMessages.INAPPROPRIATE_CHANNEL_CODE.value.replace('<PLACEHOLDER>', message.author.mention)
                     )
+                    return
 
 client = Robocop()
 client.run(token)
