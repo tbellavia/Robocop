@@ -20,6 +20,7 @@ client = discord.Client()
 
 class Robocop(discord.Client):
     async def on_ready(self):
+        self.bot_id = 634850328545853460
         self.reserved_keywords = [
             "False", "class", "finally", "is", "return",
             "None", "continue", "for", "lambda", "try",
@@ -46,6 +47,13 @@ class Robocop(discord.Client):
 
     async def on_message(self, message):
         # The return statment is here to avoid triggering other alerts.
+        for mention in message.mentions:
+            if mention.id == self.bot_id:
+                await message.channel.send(
+                    f"Mes sincères salutations {message.author.mention}"
+                )
+                return
+
         if message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
             if self.is_not_ressource_message(message.content):
                 await message.author.send(
