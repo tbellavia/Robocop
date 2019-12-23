@@ -21,3 +21,6 @@ class Channels(Enum):
     FORBIDDEN_CHANNELS = [
         439135836068642816
     ]
+    LOGGER = [
+        635116762555482112
+    ]

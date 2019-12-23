@@ -1,15 +1,18 @@
 import os
 import discord
 import re
+from random import randint
 from dotenv import load_dotenv
 from robocop.err_messages import ErrorMessages
 from robocop.channels import Channels
+from robocop.log_objects import LogObject
+from robocop.expressions import Expressions
 from urlextract import URLExtract
 
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
-
+    
 client = discord.Client()
 
 
@@ -45,20 +48,28 @@ class Robocop(discord.Client):
             return True
         return False
 
+    async def write_log(self, message, reason):
+        channel = self.get_channel(Channels.LOGGER.value[0])
+        await channel.send(
+            f"Motif : {reason}\nAuteur : {message.author}\nContenu : {message.content[:1000]}"
+        )
+
     async def on_message(self, message):
         # The return statment is here to avoid triggering other alerts.
         for mention in message.mentions:
             if mention.id == self.bot_id:
+                salutes = Expressions.SALUTE.value
                 await message.channel.send(
-                    f"Mes sincères salutations {message.author.mention}"
+                    f"{salutes[randint(0, len(salutes) - 1)]} {message.author.mention}"
                 )
                 return
 
         if message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
             if self.is_not_ressource_message(message.content):
                 await message.author.send(
-                    "{}. Voici une copie de ton message, en cas de faux positif, n'hésites pas à prévenir un modérateur.\nMessage : {}".format(ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention), message.content)
+                    "{}. Voici une copie de ton message, en cas de faux positif, n'hésites pas à prévenir un modérateur.\nMessage : {}".format(ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention), message.content[:1000])
                 )
+                await self.write_log(message, LogObject.BAD_RESSOURCE.value)
                 await message.delete()
                 return
 
