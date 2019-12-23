@@ -55,12 +55,25 @@ class Robocop(discord.Client):
             content + "\n" + ("=" * 50)
         )
         
+    async def show_man(self, channel):
+        await channel.send(
+            "NAME : Robocop\n\nCOMMANDS :\n - man \n - del message_number [filter]"
+        )
+
     async def on_message(self, message):
         # The return statment is here to avoid triggering other alerts.
 
+        # Show man
+        if message.content.startswith("!man"):
+            await self.show_man(message.channel)
+
         # Delete command
         if message.content.startswith("!del") and any(role.name == "Modérateur" for role in message.author.roles):
-            number = int(message.content.split()[1])
+            try:
+                number = int(message.content.split()[1])
+            except:
+                number = -1
+                await message.channel.send(ErrorMessages.DELETE_INTEGER_FAIL.value.replace("<PLACEHOLDER>", message.author.mention))
 
             if number <= self.DELETE_LIMIT:
                 logs = await message.channel.history(limit=number + 1).flatten()
