@@ -34,6 +34,7 @@ class Robocop(discord.Client):
             "break", "except", "in", "raise",
             "print", "len", "[", "]", "{", "}"
         ]
+        self.DELETE_LIMIT = 5
         print(f"{client.user} has connected to Discord!")
 
     def is_not_markdown(self, message):
@@ -48,14 +49,30 @@ class Robocop(discord.Client):
             return True
         return False
 
-    async def write_log(self, message, reason):
+    async def write_log(self, message, content):
         channel = self.get_channel(Channels.LOGGER.value[0])
         await channel.send(
-            f"Motif : {reason}\nAuteur : {message.author}\nContenu : {message.content[:1000]}"
+            content + "\n" + ("=" * 50)
         )
-
+        
     async def on_message(self, message):
         # The return statment is here to avoid triggering other alerts.
+
+        # Delete command
+        if message.content.startswith("!del") and any(role.name == "Modérateur" for role in message.author.roles):
+            number = int(message.content.split()[1])
+
+            if number <= self.DELETE_LIMIT:
+                logs = await message.channel.history(limit=number + 1).flatten()
+
+                for log in logs:
+                    print(f"Deleting => {log.content}")
+                    await self.write_log(message, f"Motif : {LogObject.MODERATION_DELETE.value}\nAuteur de la supression : {message.author}\nAuteur du message : {log.author}\nContenu : {log.content[:1400]}")
+                    await log.delete()
+            else:
+                await message.channel.send(f"{message.author.mention} Limite de supression dépassée.")
+
+        # Salute
         for mention in message.mentions:
             if mention.id == self.bot_id:
                 salutes = Expressions.SALUTE.value
@@ -64,15 +81,17 @@ class Robocop(discord.Client):
                 )
                 return
 
+        # Forbidden channel
         if message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
             if self.is_not_ressource_message(message.content):
                 await message.author.send(
                     "{}. Voici une copie de ton message, en cas de faux positif, n'hésites pas à prévenir un modérateur.\nMessage : {}".format(ErrorMessages.INAPPROPRIATE_CHANNEL_RESSOURCES.value.replace("<PLACEHOLDER>", message.author.mention), message.content[:1000])
                 )
-                await self.write_log(message, LogObject.BAD_RESSOURCE.value)
+                await self.write_log(message, f"Motif : {LogObject.BAD_RESSOURCE.value}\nAuteur : {message.author}\nContenu : {message.content[:1000]}")
                 await message.delete()
                 return
 
+        # Markdown fail
         if self.is_not_markdown(message.content):
             splitted_message = message.content.split()  
             counter = sum([splitted_message.count(keyword) for keyword in self.reserved_keywords])
