@@ -88,7 +88,9 @@ class Robocop(discord.Client):
         # Salute
         for mention in message.mentions:
             if mention.id == self.bot_id:
-                salutes = Expressions.SALUTE.value
+                # salutes = Expressions.SALUTE.value
+                # Commenting for XMAS celebrationm replacing messages by xmas expressions
+                salutes = Expressions.XMAS_SALUTE.value
                 await message.channel.send(
                     f"{salutes[randint(0, len(salutes) - 1)]} {message.author.mention}"
                 )
