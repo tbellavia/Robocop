@@ -39,7 +39,7 @@ class Robocop(discord.Client):
 
     def is_not_markdown(self, message):
         regex = re.compile(r"(`{3}(.|\n)*`{3})")
-        if regex.match(message) is None:
+        if regex.search(message) is None:
             return True
         return False
 
