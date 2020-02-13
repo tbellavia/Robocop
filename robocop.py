@@ -29,6 +29,7 @@ class Robocop(discord.Client):
             "print", "len", "[", "]", "{", "}"
         ]
         self.DELETE_LIMIT = 5
+        self.AUTHOR_ID = 634850328545853460
         print(f"{client.user} has connected to Discord!")
 
     def is_not_markdown(self, message):
@@ -73,18 +74,19 @@ class Robocop(discord.Client):
                 logs = await message.channel.history(limit=number + 1).flatten()
 
                 for log in logs:
-                    print(f"Deleting => {log.content}")
-                    await self.write_log(message, f"Motif : {LogObject.MODERATION_DELETE.value}\nAuteur de la supression : {message.author}\nAuteur du message : {log.author}\nContenu : {log.content[:1400]}")
-                    await log.delete()
+                    if any(author.id == self.AUTHOR_ID for author in message.mentions) == False:
+                        await self.write_log(message, f"Motif : {LogObject.MODERATION_DELETE.value}\nAuteur de la supression : {message.author}\nAuteur du message : {log.author}\nContenu : {log.content[:1400]}")
+                        await log.delete()
             else:
                 await message.channel.send(f"{message.author.mention} Limite de supression dépassée.")
 
         # Salute
         elif len([mention for mention in message.mentions if mention.id == self.bot_id]) != 0:
-            salutes = Expressions.SALUTE.value
-            await message.channel.send(
-                f"{salutes[randint(0, len(salutes) - 1)]} {message.author.mention}"
-            )
+            if self.AUTHOR_ID != message.author:
+                salutes = Expressions.SALUTE.value
+                await message.channel.send(
+                    f"{salutes[randint(0, len(salutes) - 1)]} {message.author.mention}"
+                )
 
         # Forbidden channel
         elif message.channel.id in Channels.FORBIDDEN_CHANNELS.value:
