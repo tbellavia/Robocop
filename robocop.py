@@ -74,6 +74,7 @@ class Robocop(discord.Client):
                 logs = await message.channel.history(limit=number + 1).flatten()
 
                 for log in logs:
+                    # Checking that the message does not contain Robocop mention to prevent infinite loop
                     if any(author.id == self.AUTHOR_ID for author in message.mentions) == False:
                         await self.write_log(message, f"Motif : {LogObject.MODERATION_DELETE.value}\nAuteur de la supression : {message.author}\nAuteur du message : {log.author}\nContenu : {log.content[:1400]}")
                         await log.delete()
