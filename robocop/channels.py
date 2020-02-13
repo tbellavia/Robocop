@@ -24,3 +24,16 @@ class Channels(Enum):
     LOGGER = [
         658673063172505647
     ]
+
+#TODO add the proper channels of staging server channels.
+
+class StagingServerChannels(Enum):
+    CODE_CHANNELS = [
+
+    ]
+    FORBIDDEN_CHANNELS = [
+
+    ]
+    LOGGER = [
+
+    ]
