@@ -97,19 +97,19 @@ class Robocop(discord.Client):
                 logs = await message.channel.history(limit=number + 1).flatten()
 
                 for log in logs:
-                    logger.info(f"Deleting => {log.content}")
-                    await self.write_log(message,
-                                         f"Motif : {LogObject.MODERATION_DELETE.value}\nAuteur de la supression : {message.author}\nAuteur du message : {log.author}\nContenu : {log.content[:1400]}")
-                    await log.delete()
+                    # Checking that the message does not contain Robocop mention to prevent infinite loop
+                    if any(author.id == self.user.id for author in message.mentions) == False:
+                        logger.info(f"Deleting => {log.content}")
+                        await self.write_log(message, f"Motif : {LogObject.MODERATION_DELETE.value}\nAuteur de la supression : {message.author}\nAuteur du message : {log.author}\nContenu : {log.content[:1400]}")
+                        await log.delete()
             else:
                 await message.channel.send(f"{message.author.mention} Limite de supression dépassée.")
 
         # Salute
         elif len([mention for mention in message.mentions if mention.id == self.user.id]) != 0:
-            salutes = Expressions.SALUTE.value
-            await message.channel.send(
-                    f"{salutes[randint(0, len(salutes) - 1)]} {message.author.mention}"
-            )
+            if self.user.id != message.author:
+                salutes = Expressions.SALUTE.value
+                await message.channel.send(f"{salutes[randint(0, len(salutes) - 1)]} {message.author.mention}")
 
         # Forbidden channel
         elif message.channel.id in self.channels.forbidden_channels:
